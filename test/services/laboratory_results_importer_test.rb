@@ -28,6 +28,16 @@ class LaboratoryResultsImporterTest < ActiveSupport::TestCase
     assert_equal 2, assessment_for("Josh Brown", "REF-2024-005").observations.count
   end
 
+  test "imports respiratory rate using its configured LOINC description" do
+    LaboratoryResultsImporter.new("John Doe|1985-03-15|M|REF-RESP-001\n9279-1|16|breaths/min\n").call
+
+    observation = assessment_for("John Doe", "REF-RESP-001").observations.first
+    assert_equal "9279-1", observation.code
+    assert_equal "Respiratory Rate", observation.name
+    assert_equal 16.0, observation.value
+    assert_equal "breaths/min", observation.units
+  end
+
   test "updates records when the same file is imported again" do
     patient = Patient.create!(name: "John Doe", dob: Date.new(1985, 3, 15), sex_at_birth: "M")
     assessment = patient.assessments.create!(reference: "REF-2024-001")
