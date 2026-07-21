@@ -38,7 +38,7 @@ class LaboratoryResultsImporterTest < ActiveSupport::TestCase
     assert_equal "breaths/min", observation.units
   end
 
-  test "updates records when the same file is imported again" do
+  test "skips an observation that already exists" do
     patient = Patient.create!(name: "John Doe", dob: Date.new(1985, 3, 15), sex_at_birth: "M")
     assessment = patient.assessments.create!(reference: "REF-2024-001")
     assessment.observations.create!(name: "Blood Pressure (Systolic)", code: "8480-6", value: 100, units: "mmHg")
@@ -48,11 +48,28 @@ class LaboratoryResultsImporterTest < ActiveSupport::TestCase
     assert_equal 1, Patient.count
     assert_equal 1, patient.assessments.count
     observation = Assessment.find(assessment.id).observations.first
-    assert_equal 120.0, observation.value
-    assert_equal "kPa", observation.units
+    assert_equal 100.0, observation.value
+    assert_equal "mmHg", observation.units
   end
 
-  test "returns created and updated record counts" do
+  test "skips duplicate observations within one file" do
+    content = <<~RESULTS
+      John Doe|1985-03-15|M|REF-1
+      8867-4|72|bpm
+      8867-4|75|bpm
+    RESULTS
+
+    result = LaboratoryResultsImporter.new(content).call
+
+    assessment = assessment_for("John Doe", "REF-1")
+    observation = assessment.observations.first
+    assert_equal 1, assessment.observations.count
+    assert_equal 72.0, observation.value
+    assert_equal 1, result.observations_created_count
+    assert_equal 1, result.observations_skipped_count
+  end
+
+  test "skips duplicate observations from a later import" do
     content = "John Doe|1985-03-15|M|REF-1\n8867-4|72|bpm\n"
 
     first_result = LaboratoryResultsImporter.new(content).call
@@ -61,11 +78,11 @@ class LaboratoryResultsImporterTest < ActiveSupport::TestCase
     assert_equal 1, first_result.patients_created_count
     assert_equal 1, first_result.assessments_created_count
     assert_equal 1, first_result.observations_created_count
-    assert_equal 0, first_result.observations_updated_count
+    assert_equal 0, first_result.observations_skipped_count
     assert_equal 0, second_result.patients_created_count
     assert_equal 0, second_result.assessments_created_count
     assert_equal 0, second_result.observations_created_count
-    assert_equal 1, second_result.observations_updated_count
+    assert_equal 1, second_result.observations_skipped_count
   end
 
   test "rejects malformed input before records are created" do

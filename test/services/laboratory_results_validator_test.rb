@@ -21,4 +21,17 @@ class LaboratoryResultsValidatorTest < ActiveSupport::TestCase
     assert_match "Invalid date", error.message
     assert_equal 0, Patient.count
   end
+
+  test "accepts duplicate observations for the importer to skip" do
+    content = <<~RESULTS
+      John Doe|1985-03-15|M|REF-1
+      8867-4|72|bpm
+      8867-4|75|bpm
+    RESULTS
+
+    parsed_assessments = LaboratoryResultsValidator.new(content).call
+
+    assert_equal 2, parsed_assessments.first[:observations].size
+    assert_equal 0, Patient.count
+  end
 end

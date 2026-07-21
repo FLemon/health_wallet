@@ -12,7 +12,7 @@ class LaboratoryImport
   field :patients_created_count, type: Integer, default: 0
   field :assessments_created_count, type: Integer, default: 0
   field :observations_created_count, type: Integer, default: 0
-  field :observations_updated_count, type: Integer, default: 0
+  field :observations_skipped_count, type: Integer, default: 0
 
   validates :filename, :file_content, presence: true
   validates :status, inclusion: { in: STATUSES }

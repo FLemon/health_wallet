@@ -12,7 +12,7 @@ class LaboratoryImportJob < ApplicationJob
       patients_created_count: result.patients_created_count,
       assessments_created_count: result.assessments_created_count,
       observations_created_count: result.observations_created_count,
-      observations_updated_count: result.observations_updated_count
+      observations_skipped_count: result.observations_skipped_count
     )
   rescue Mongoid::Errors::DocumentNotFound
     # The import was removed before the job started.

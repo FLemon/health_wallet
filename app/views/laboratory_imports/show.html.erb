@@ -19,7 +19,7 @@
       <dt>Patients created</dt><dd><%= @laboratory_import.patients_created_count %></dd>
       <dt>Assessments created</dt><dd><%= @laboratory_import.assessments_created_count %></dd>
       <dt>Observations created</dt><dd><%= @laboratory_import.observations_created_count %></dd>
-      <dt>Observations updated</dt><dd><%= @laboratory_import.observations_updated_count %></dd>
+      <dt>Duplicate observations skipped</dt><dd><%= @laboratory_import.observations_skipped_count %></dd>
     </dl>
     <%= link_to "View patients", patients_path, class: "btn" %>
   <% end %>
