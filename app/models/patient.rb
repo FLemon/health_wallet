@@ -7,4 +7,6 @@ class Patient
   field :sex_at_birth, type: String
 
   has_many :assessments
+
+  index({ name: 1, dob: 1, sex_at_birth: 1 }, { unique: true })
 end
