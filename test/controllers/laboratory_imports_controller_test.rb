@@ -8,7 +8,7 @@ class LaboratoryImportsControllerTest < ActionDispatch::IntegrationTest
   end
 
   test "creates an import and enqueues processing" do
-    file = fixture_file_upload("results.txt", "text/plain")
+    file = fixture_file_upload("John_Doe_HL7.txt", "text/plain")
 
     assert_enqueued_with(job: LaboratoryImportJob) do
       post laboratory_imports_url, params: { laboratory_import: { file: file } }
