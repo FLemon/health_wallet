@@ -5,7 +5,7 @@ class LaboratoryImportsController < ApplicationController
 
   def validate
     content, filename = uploaded_content_and_filename!
-    LaboratoryResultsValidator.new(content).call
+    validate_content!(content)
 
     render json: { valid: true, filename: filename }
   rescue LaboratoryResultsValidator::ParseError => error
@@ -14,7 +14,7 @@ class LaboratoryImportsController < ApplicationController
 
   def create
     content, filename = uploaded_content_and_filename!
-    LaboratoryResultsValidator.new(content).call
+    validate_content!(content)
 
     @laboratory_import = LaboratoryImport.new(
       filename: filename,
@@ -42,9 +42,10 @@ class LaboratoryImportsController < ApplicationController
     upload = params.dig(:laboratory_import, :file)
     raise LaboratoryResultsValidator::ParseError, "must be selected" unless upload.present?
 
-    content = upload.read.force_encoding(Encoding::UTF_8)
-    raise LaboratoryResultsValidator::ParseError, "must be valid UTF-8 text" unless content.valid_encoding?
+    [ upload.read.force_encoding(Encoding::UTF_8), upload.original_filename ]
+  end
 
-    [ content, upload.original_filename ]
+  def validate_content!(content)
+    LaboratoryResultsValidator.new(content).call
   end
 end
