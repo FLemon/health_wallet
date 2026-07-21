@@ -1,4 +1,8 @@
 class LaboratoryImportsController < ApplicationController
+  def index
+    @laboratory_imports = LaboratoryImport.order_by(created_at: :desc)
+  end
+
   def new
     @laboratory_import = LaboratoryImport.new
   end

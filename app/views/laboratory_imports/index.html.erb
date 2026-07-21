@@ -1,0 +1,28 @@
+<div class="import-container">
+  <%= link_to "← Back to Patients", patients_path, class: "back-link" %>
+  <%= link_to "Import laboratory results", new_laboratory_import_path, class: "back-link" %>
+  <h1>Laboratory import history</h1>
+
+  <% if @laboratory_imports.any? %>
+    <table class="imports-table">
+      <thead>
+        <tr>
+          <th scope="col">File</th>
+          <th scope="col">Submitted</th>
+          <th scope="col">Status</th>
+        </tr>
+      </thead>
+      <tbody>
+        <% @laboratory_imports.each do |laboratory_import| %>
+          <tr>
+            <td><%= link_to laboratory_import.filename, laboratory_import_path(laboratory_import) %></td>
+            <td><time datetime="<%= laboratory_import.created_at.iso8601 %>"><%= l(laboratory_import.created_at, format: :short) %></time></td>
+            <td><span class="status status-<%= laboratory_import.status %>"><%= laboratory_import.status.capitalize %></span></td>
+          </tr>
+        <% end %>
+      </tbody>
+    </table>
+  <% else %>
+    <p>No laboratory imports have been uploaded yet.</p>
+  <% end %>
+</div>

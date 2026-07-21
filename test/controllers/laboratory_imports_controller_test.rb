@@ -1,6 +1,28 @@
 require "test_helper"
 
 class LaboratoryImportsControllerTest < ActionDispatch::IntegrationTest
+  test "lists laboratory imports with their submission time and status" do
+    pending_import = LaboratoryImport.create!(filename: "pending.txt", file_content: "content")
+    completed_import = LaboratoryImport.create!(filename: "completed.txt", file_content: "content", status: "completed")
+
+    get laboratory_imports_url
+
+    assert_response :success
+    assert_select "table.imports-table tbody tr", count: 2
+    assert_select "a[href='#{laboratory_import_path(pending_import)}']", text: "pending.txt"
+    assert_select "a[href='#{laboratory_import_path(completed_import)}']", text: "completed.txt"
+    assert_select "time", count: 2
+    assert_select ".status-pending", text: "Pending"
+    assert_select ".status-completed", text: "Completed"
+  end
+
+  test "shows an empty state when there are no laboratory imports" do
+    get laboratory_imports_url
+
+    assert_response :success
+    assert_select "p", "No laboratory imports have been uploaded yet."
+  end
+
   test "shows the upload form" do
     get new_laboratory_import_url
     assert_response :success
