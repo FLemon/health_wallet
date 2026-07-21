@@ -11,9 +11,16 @@ class LaboratoryImportsController < ApplicationController
       return render :new, status: :unprocessable_entity
     end
 
+    content = upload.read.force_encoding(Encoding::UTF_8)
+    unless content.valid_encoding?
+      @laboratory_import = LaboratoryImport.new
+      @laboratory_import.errors.add(:file, "must be valid UTF-8 text")
+      return render :new, status: :unprocessable_entity
+    end
+
     @laboratory_import = LaboratoryImport.new(
       filename: upload.original_filename,
-      file_content: upload.read
+      file_content: content
     )
     if @laboratory_import.save
       LaboratoryImportJob.perform_later(@laboratory_import.id.to_s)

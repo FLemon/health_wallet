@@ -51,6 +51,45 @@ class LaboratoryResultsImporterTest < ActiveSupport::TestCase
     assert_equal 0, Patient.count
   end
 
+  test "accepts UTF-8 BOM, Windows line endings, blank lines, and surrounding whitespace" do
+    content = "\uFEFF  John Doe | 1985-03-15 | M | REF-1 \r\n\r\n 8867-4 | 72 | bpm \r\n"
+
+    LaboratoryResultsImporter.new(content).call
+
+    observation = assessment_for("John Doe", "REF-1").observations.first
+    assert_equal 72.0, observation.value
+    assert_equal "bpm", observation.units
+  end
+
+  [ "NaN", "Infinity", "-Infinity", "not-a-number" ].each do |value|
+    test "rejects non-finite or invalid observation value #{value.inspect}" do
+      error = assert_raises(LaboratoryResultsImporter::ParseError) do
+        LaboratoryResultsImporter.new("John Doe|1985-03-15|M|REF-1\n8867-4|#{value}|bpm\n").call
+      end
+
+      assert_match "Invalid observation value", error.message
+      assert_equal 0, Patient.count
+    end
+  end
+
+  test "rejects unsupported codes, incomplete assessments, and observations before headers" do
+    [
+      "John Doe|1985-03-15|M|REF-1\n9999-9|72|bpm\n",
+      "John Doe|1985-03-15|M|REF-1\n",
+      "8867-4|72|bpm\n"
+    ].each do |content|
+      assert_raises(LaboratoryResultsImporter::ParseError) { LaboratoryResultsImporter.new(content).call }
+      assert_equal 0, Patient.count
+    end
+  end
+
+  test "rejects invalid UTF-8 and malformed field counts without creating records" do
+    [ "John Doe|1985-03-15|M|REF-1|unexpected\n", "\xFF".b ].each do |content|
+      assert_raises(LaboratoryResultsImporter::ParseError) { LaboratoryResultsImporter.new(content).call }
+      assert_equal 0, Patient.count
+    end
+  end
+
   private
 
   def import_fixture(filename)
