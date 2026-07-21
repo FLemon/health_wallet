@@ -38,6 +38,16 @@ class LaboratoryResultsImporterTest < ActiveSupport::TestCase
     assert_equal "breaths/min", observation.units
   end
 
+  test "uses an immutable copy of the supplied content" do
+    content = String.new("John Doe|1985-03-15|M|REF-IMMUTABLE-001\n8867-4|72|bpm\n")
+    importer = LaboratoryResultsImporter.new(content)
+    content.replace(String.new("invalid"))
+
+    importer.call
+
+    assert_equal 1, assessment_for("John Doe", "REF-IMMUTABLE-001").observations.count
+  end
+
   test "skips an observation that already exists" do
     patient = Patient.create!(name: "John Doe", dob: Date.new(1985, 3, 15), sex_at_birth: "M")
     assessment = patient.assessments.create!(reference: "REF-2024-001")

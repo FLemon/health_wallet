@@ -10,7 +10,7 @@ class LaboratoryResultsImporter
   ParseError = LaboratoryResultsValidator::ParseError
 
   def initialize(content)
-    @content = content
+    @content = content.to_s.dup.freeze
   end
 
   def call

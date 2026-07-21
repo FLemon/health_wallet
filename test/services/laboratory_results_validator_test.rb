@@ -34,4 +34,14 @@ class LaboratoryResultsValidatorTest < ActiveSupport::TestCase
     assert_equal 2, parsed_assessments.first[:observations].size
     assert_equal 0, Patient.count
   end
+
+  test "uses an immutable copy of the supplied content" do
+    content = String.new("John Doe|1985-03-15|M|REF-1\n8867-4|72|bpm\n")
+    validator = LaboratoryResultsValidator.new(content)
+    content.replace(String.new("invalid"))
+
+    parsed_assessments = validator.call
+
+    assert_equal "John Doe", parsed_assessments.first[:name]
+  end
 end

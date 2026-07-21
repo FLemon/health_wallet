@@ -17,7 +17,7 @@ class LaboratoryResultsValidator
   class ParseError < StandardError; end
 
   def initialize(content)
-    @content = content
+    @content = content.to_s.dup.freeze
   end
 
   def call
