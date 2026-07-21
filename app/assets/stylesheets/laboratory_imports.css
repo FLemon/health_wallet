@@ -6,3 +6,6 @@
 .import-status dt { font-weight: 600; }.import-status dd { margin: 0; }
 .status { padding: 3px 8px; border-radius: 12px; background: var(--color-bg-hover); }.status-completed { color: #167a3f; }.status-failed { color: #b42318; }
 .flash-error { color: #b42318; margin-bottom: 16px; }
+.validation-status { margin: 0 0 16px; color: var(--color-text-secondary); }
+.validation-status.is-valid { color: #167a3f; }
+.validation-status.is-invalid { color: #b42318; }
