@@ -1,6 +1,14 @@
 require "date"
 
 class LaboratoryResultsImporter
+  Result = Struct.new(
+    :patients_created_count,
+    :assessments_created_count,
+    :observations_created_count,
+    :observations_updated_count,
+    keyword_init: true
+  )
+
   OBSERVATION_NAMES = {
     "8480-6" => "Blood Pressure (Systolic)",
     "8462-4" => "Blood Pressure (Diastolic)",
@@ -21,7 +29,15 @@ class LaboratoryResultsImporter
   end
 
   def call
-    parse.each { |assessment_data| import_assessment(assessment_data) }
+    result = Result.new(
+      patients_created_count: 0,
+      assessments_created_count: 0,
+      observations_created_count: 0,
+      observations_updated_count: 0
+    )
+
+    parse.each { |assessment_data| import_assessment(assessment_data, result) }
+    result
   end
 
   private
@@ -99,14 +115,27 @@ class LaboratoryResultsImporter
     raise ParseError, "Assessment declared on line #{assessment[:line_number]} has no observations"
   end
 
-  def import_assessment(data)
-    patient = Patient.where(name: data[:name], dob: data[:dob], sex_at_birth: data[:sex_at_birth]).first ||
-      Patient.create!(name: data[:name], dob: data[:dob], sex_at_birth: data[:sex_at_birth])
-    assessment = patient.assessments.where(reference: data[:reference]).first ||
-      patient.assessments.create!(reference: data[:reference])
+  def import_assessment(data, result)
+    patient = Patient.where(name: data[:name], dob: data[:dob], sex_at_birth: data[:sex_at_birth]).first
+    unless patient
+      patient = Patient.create!(name: data[:name], dob: data[:dob], sex_at_birth: data[:sex_at_birth])
+      result.patients_created_count += 1
+    end
+
+    assessment = patient.assessments.where(reference: data[:reference]).first
+    unless assessment
+      assessment = patient.assessments.create!(reference: data[:reference])
+      result.assessments_created_count += 1
+    end
 
     data[:observations].each do |observation_data|
-      observation = assessment.observations.where(code: observation_data[:code]).first || assessment.observations.build(code: observation_data[:code])
+      observation = assessment.observations.where(code: observation_data[:code]).first
+      if observation
+        result.observations_updated_count += 1
+      else
+        observation = assessment.observations.build(code: observation_data[:code])
+        result.observations_created_count += 1
+      end
       observation.assign_attributes(observation_data)
       observation.save!
     end

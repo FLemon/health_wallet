@@ -52,6 +52,22 @@ class LaboratoryResultsImporterTest < ActiveSupport::TestCase
     assert_equal "kPa", observation.units
   end
 
+  test "returns created and updated record counts" do
+    content = "John Doe|1985-03-15|M|REF-1\n8867-4|72|bpm\n"
+
+    first_result = LaboratoryResultsImporter.new(content).call
+    second_result = LaboratoryResultsImporter.new(content).call
+
+    assert_equal 1, first_result.patients_created_count
+    assert_equal 1, first_result.assessments_created_count
+    assert_equal 1, first_result.observations_created_count
+    assert_equal 0, first_result.observations_updated_count
+    assert_equal 0, second_result.patients_created_count
+    assert_equal 0, second_result.assessments_created_count
+    assert_equal 0, second_result.observations_created_count
+    assert_equal 1, second_result.observations_updated_count
+  end
+
   test "rejects malformed input before records are created" do
     error = assert_raises(LaboratoryResultsImporter::ParseError) do
       LaboratoryResultsImporter.new("John Doe|not-a-date|M|REF-1\n8480-6|120|mmHg\n").call

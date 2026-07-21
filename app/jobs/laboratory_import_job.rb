@@ -5,8 +5,15 @@ class LaboratoryImportJob < ApplicationJob
     laboratory_import = LaboratoryImport.find(import_id)
     laboratory_import.update!(status: "processing", error_message: nil)
 
-    LaboratoryResultsImporter.new(laboratory_import.file_content).call
-    laboratory_import.update!(status: "completed", completed_at: Time.current)
+    result = LaboratoryResultsImporter.new(laboratory_import.file_content).call
+    laboratory_import.update!(
+      status: "completed",
+      completed_at: Time.current,
+      patients_created_count: result.patients_created_count,
+      assessments_created_count: result.assessments_created_count,
+      observations_created_count: result.observations_created_count,
+      observations_updated_count: result.observations_updated_count
+    )
   rescue Mongoid::Errors::DocumentNotFound
     # The import was removed before the job started.
   rescue StandardError => error

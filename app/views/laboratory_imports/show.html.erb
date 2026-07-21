@@ -14,6 +14,13 @@
     <p>This page refreshes automatically while the import is running.</p>
     <meta http-equiv="refresh" content="3">
   <% elsif @laboratory_import.status == "completed" %>
+    <h2>Import results</h2>
+    <dl class="import-status">
+      <dt>Patients created</dt><dd><%= @laboratory_import.patients_created_count %></dd>
+      <dt>Assessments created</dt><dd><%= @laboratory_import.assessments_created_count %></dd>
+      <dt>Observations created</dt><dd><%= @laboratory_import.observations_created_count %></dd>
+      <dt>Observations updated</dt><dd><%= @laboratory_import.observations_updated_count %></dd>
+    </dl>
     <%= link_to "View patients", patients_path, class: "btn" %>
   <% end %>
 </div>

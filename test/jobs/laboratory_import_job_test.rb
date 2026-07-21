@@ -10,6 +10,10 @@ class LaboratoryImportJobTest < ActiveJob::TestCase
     LaboratoryImportJob.perform_now(laboratory_import.id.to_s)
 
     assert_equal "completed", laboratory_import.reload.status
+    assert_equal 1, laboratory_import.patients_created_count
+    assert_equal 1, laboratory_import.assessments_created_count
+    assert_equal 1, laboratory_import.observations_created_count
+    assert_equal 0, laboratory_import.observations_updated_count
     assert_equal 1, Patient.count
   end
 
