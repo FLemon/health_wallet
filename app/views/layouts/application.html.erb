@@ -27,6 +27,16 @@
   </head>
 
   <body>
+    <header class="site-header">
+      <div class="site-header-content">
+        <%= link_to "Health Wallet", root_path, class: "site-brand" %>
+        <nav class="site-navigation" aria-label="Primary navigation">
+          <%= link_to "Patients", patients_path %>
+          <%= link_to "Uploads", laboratory_imports_path %>
+          <%= link_to "New upload", new_laboratory_import_path, class: "site-navigation-action" %>
+        </nav>
+      </div>
+    </header>
     <%= yield %>
   </body>
 </html>
