@@ -6,6 +6,21 @@ AI assistance (Codex) was used extensively to draft and modify the
 implementation and tests. The developer directed the requirements, reviewed the
 changes, and made the product and design decisions.
 
+## Developer direction
+
+The developer specified and reviewed the following key decisions:
+
+- Separate reusable, database-free validation from creation and insertion, with
+  a client-callable preflight endpoint and authoritative server revalidation.
+- Treat duplicate observations within a file and across later imports as valid,
+  skipped records, and report their count without overwriting existing values.
+- Persist every upload with durable status/history so users can return later to
+  inspect processing results or failures.
+- Cover supplied examples, malformed input, observation mappings, browser-ready
+  scenarios, physical MongoDB indexes, and multi-step integration workflows.
+- Keep changes reviewable through focused commits, refactoring, and explicit
+  test-layering discussions.
+
 ## Laboratory import workflow
 
 - Added upload, history, and import-status pages for pipe-delimited
