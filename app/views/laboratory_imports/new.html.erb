@@ -1,0 +1,16 @@
+<div class="import-container">
+  <%= link_to "← Back to Patients", patients_path, class: "back-link" %>
+  <%= link_to "View import history", laboratory_imports_path, class: "back-link" %>
+  <h1>Import laboratory results</h1>
+  <p>Upload a pipe-delimited HL7 text file. The import will run in the background.</p>
+
+  <%= form_with model: @laboratory_import, class: "import-form", data: { controller: "laboratory-import-validation", laboratory_import_validation_url_value: validate_laboratory_imports_path } do |form| %>
+    <% if @laboratory_import.errors.any? %>
+      <div class="flash-error"><%= @laboratory_import.errors.full_messages.to_sentence %></div>
+    <% end %>
+    <%= form.label :file, "Laboratory results file" %>
+    <%= form.file_field :file, accept: ".txt,text/plain", required: true, data: { laboratory_import_validation_target: "file", action: "change->laboratory-import-validation#validate" } %>
+    <p class="validation-status" data-laboratory-import-validation-target="message">Choose a file to validate it before upload.</p>
+    <%= form.submit "Upload and import", class: "btn", data: { laboratory_import_validation_target: "submit" } %>
+  <% end %>
+</div>

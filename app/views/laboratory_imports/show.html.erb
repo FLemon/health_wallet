@@ -1,0 +1,27 @@
+<div class="import-container">
+  <%= link_to "← Import another file", new_laboratory_import_path, class: "back-link" %>
+  <%= link_to "View import history", laboratory_imports_path, class: "back-link" %>
+  <h1>Laboratory import</h1>
+
+  <% if notice %><div class="flash-notice"><%= notice %></div><% end %>
+
+  <dl class="import-status">
+    <dt>File</dt><dd><%= @laboratory_import.filename %></dd>
+    <dt>Status</dt><dd><span class="status status-<%= @laboratory_import.status %>"><%= @laboratory_import.status.capitalize %></span></dd>
+    <% if @laboratory_import.status == "failed" %><dt>Error</dt><dd><%= @laboratory_import.error_message %></dd><% end %>
+  </dl>
+
+  <% if %w[pending processing].include?(@laboratory_import.status) %>
+    <p>This page refreshes automatically while the import is running.</p>
+    <meta http-equiv="refresh" content="3">
+  <% elsif @laboratory_import.status == "completed" %>
+    <h2>Import results</h2>
+    <dl class="import-status">
+      <dt>Patients created</dt><dd><%= @laboratory_import.patients_created_count %></dd>
+      <dt>Assessments created</dt><dd><%= @laboratory_import.assessments_created_count %></dd>
+      <dt>Observations created</dt><dd><%= @laboratory_import.observations_created_count %></dd>
+      <dt>Duplicate observations skipped</dt><dd><%= @laboratory_import.observations_skipped_count %></dd>
+    </dl>
+    <%= link_to "View patients", patients_path, class: "btn" %>
+  <% end %>
+</div>

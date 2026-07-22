@@ -9,4 +9,6 @@ class Assessment
 
   embeds_many :observations
   accepts_nested_attributes_for :observations
+
+  index({ patient_id: 1, reference: 1 }, { unique: true })
 end
